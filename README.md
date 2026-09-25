@@ -1,5 +1,7 @@
 # TokenGuard 🛡️
 
+[![PyPI version](https://img.shields.io/pypi/v/tokenguard-cli.svg?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/tokenguard-cli/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/tokenguard-cli.svg?style=flat-square)](https://pypi.org/project/tokenguard-cli/)
 [![CI](https://github.com/umutgungorr/tokenguard/actions/workflows/ci.yml/badge.svg)](https://github.com/umutgungorr/tokenguard/actions/workflows/ci.yml)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![SARIF v2.1.0](https://img.shields.io/badge/SARIF-v2.1.0-blue?logo=github)](https://docs.github.com/en/code-security/code-scanning)
@@ -9,6 +11,10 @@
 
 > **Lightweight, zero-dependency Git pre-commit secret scanner with native SARIF & baseline suppression.**  
 > Prevent accidental leaks of API tokens, cloud credentials, private keys, and high-entropy secrets *before* they hit your Git history or pull requests.
+
+<p align="center">
+  <img src="assets/demo.png" alt="TokenGuard Demo" width="850">
+</p>
 
 ```text
 $ tokenguard --staged
@@ -62,10 +68,10 @@ Accidentally committing secrets (API keys, private keys, cloud tokens) to Git re
 
 ### 1. Installation
 
-Install via pip in your development environment:
+Install via pip from PyPI:
 
 ```bash
-pip install .
+pip install tokenguard-cli
 ```
 
 Or run directly without installation:
