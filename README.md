@@ -54,185 +54,47 @@ Accidentally committing secrets (API keys, private keys, cloud tokens) to Git re
 |---------|------|----------|------------|-------------|
 | `SEC-001` | AWS Access Key ID | CRITICAL | HIGH | AWS IAM & STS access keys (`AKIA...`, `ASIA...`) |
 | `SEC-002` | AWS Secret Access Key | CRITICAL | HIGH | Declared AWS secret access key pairs |
-| `SEC-003` | GitHub Access Token | CRITICAL | HIGH | Classic & fine-grained personal access tokens (`ghp_...`, `github_pat_...`) |
-| `SEC-004` | OpenAI API Key | CRITICAL | HIGH | OpenAI secret keys (`sk-...`, `sk-proj-...`) |
-| `SEC-005` | Slack Bot/User Token | CRITICAL | HIGH | Slack bot, workspace, or user tokens (`xoxb-...`, `xoxp-...`) |
-| `SEC-006` | Private Encryption Key | CRITICAL | HIGH | Raw PEM/OpenSSH private key blocks |
-| `SEC-007` | Generic API Key Assignment | HIGH | MEDIUM | Hardcoded generic API keys & client secrets |
-| `SEC-008` | JSON Web Token (JWT) | MEDIUM | LOW | Raw authorization headers or JWT tokens |
-| `ENTROPY-001` | High Shannon Entropy Token | HIGH | HIGH | Arbitrary base64/hex tokens (Entropy $\ge 4.2$) |
+| `SEC-003` | GitHub Access Token | CRITICAL | HIGH | Classic and fine-grained GitHub tokens |
+| `SEC-004` | Generic Private Key | HIGH | HIGH | RSA, DSA, EC, OPENSSH private keys |
+| `SEC-005` | High Entropy String | MEDIUM | LOW | Random base64/hex strings commonly used as secrets |
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Installation
-
-Install via pip from PyPI:
+### Installation
 
 ```bash
 pip install tokenguard-cli
 ```
 
-Or run directly without installation:
+### Pre-commit Hook (Recommended)
 
-```bash
-python -m tokenguard --help
-```
-
-### 2. Install as a Git Pre-Commit Hook
-
-Install directly into your repository:
-
-```bash
-tokenguard --install-hook
-```
-
-This creates an executable `.git/hooks/pre-commit` hook that scans staged changes before every commit.
-
-### 3. Baseline Legacy or Mock Secrets
-
-If your repo contains accepted mock credentials or existing legacy keys, create a baseline:
-
-```bash
-# Record all current findings to .tokenguard.baseline
-tokenguard --update-baseline
-
-# Future scans will suppress baselined secrets and only fail on NEW leaks!
-tokenguard
-```
-
-### 4. GitHub Actions & Code Scanning (SARIF)
-
-Generate a SARIF report for GitHub Code Scanning:
-
-```bash
-tokenguard --format sarif -o results.sarif
-```
-
-#### Option A: Hard Gate / Enforcement (Fails PR on Secrets)
-Recommended for security enforcement. Fails the build immediately if unbaselined secrets are detected, while always uploading findings to GitHub Code Scanning:
+Add this to your `.pre-commit-config.yaml`:
 
 ```yaml
-name: TokenGuard Secret Scan
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
-permissions:
-  contents: read
-  security-events: write
-
-jobs:
-  tokenguard-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Run TokenGuard
-        run: |
-          python -m tokenguard --format sarif -o results.sarif .
-
-      - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: results.sarif
+repos:
+  - repo: https://github.com/umutgungorr/tokenguard
+    rev: v0.2.0
+    hooks:
+      - id: tokenguard
 ```
 
-> **Why permissions matter**: `security-events: write` is required by GitHub for actions to submit SARIF alerts to the Security tab. `contents: read` is required for repository checkout.
+### Manual Usage
 
-#### Option B: Advisory / Non-blocking Mode
-Report findings to the Security tab without failing the CI pipeline:
+```bash
+# Scan a specific directory
+tokenguard scan ./src
 
-```yaml
-      - name: Run TokenGuard (Advisory)
-        run: |
-          python -m tokenguard --format sarif -o results.sarif .
-        continue-on-error: true
+# Scan all staged files
+tokenguard --staged
 
-      - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: results.sarif
-```
-
-#### Option C: Official GitHub Marketplace Action
-You can also run TokenGuard via its official Marketplace Action:
-
-```yaml
-      - name: Run TokenGuard Action
-        uses: umutgungorr/tokenguard@v0.2.0
-        with:
-          format: 'sarif'
-          output: 'results.sarif'
+# Generate SARIF report for GitHub Advanced Security
+tokenguard scan ./src --format sarif --output results.sarif
 ```
 
 ---
 
-## ⚙️ CLI Options & Flags
+## 📝 License
 
-```text
-usage: tokenguard [-h] [--version] [--staged] [--install-hook]
-                  [--format {text,json,sarif}] [-o OUTPUT]
-                  [--baseline BASELINE] [--update-baseline]
-                  [--entropy-threshold FLOAT] [--ignore-rule RULE_ID]
-                  [--no-color] [-q] [-v] [--dry-run]
-                  [paths ...]
-
-positional arguments:
-  paths                 Files or directories to scan (default: current directory or git staged)
-
-options:
-  -h, --help            Show this help message and exit
-  --version             Show program's version number and exit
-  --staged              Scan git staged files before commit
-  --install-hook        Install TokenGuard into local .git/hooks/pre-commit
-  --format {text,json,sarif}
-                        Report format (default: text)
-  -o, --output PATH     Write report output to specified file
-  --baseline PATH       Path to baseline file (default: .tokenguard.baseline if present)
-  --update-baseline     Record current findings to baseline file and exit 0
-  --entropy-threshold FLOAT
-                        Shannon entropy threshold for unknown tokens (default: 4.2, 0 to disable)
-  --ignore-rule RULE_ID Ignore specific rule (e.g. SEC-008)
-  --no-color            Disable ANSI color codes
-  -q, --quiet           Suppress scan headers and info messages
-  -v, --verbose         Verbose mode
-  --dry-run             Simulate execution without returning failure exit codes
-```
-
-### Deterministic Exit Codes
-
-| Exit Code | Meaning |
-|-----------|---------|
-| `0` | Success: Clean (or all findings baselined / dry-run) |
-| `1` | Secrets detected: Unbaselined credentials found |
-| `2` | Error: Invalid arguments or I/O failure |
-
----
-
-## 🧪 Running Tests
-
-```bash
-uv run --with pytest pytest
-```
-
----
-
-## 🔒 Security & Privacy
-
-TokenGuard runs 100% locally. It never transmits code, tokens, or telemetry over the network.
-
-## 📄 License
-
-MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
