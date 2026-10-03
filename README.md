@@ -95,6 +95,11 @@ tokenguard scan ./src --format sarif --output results.sarif
 
 ---
 
+
+## Project case study
+
+TokenGuard is an open-source project by [Umut Güngör](https://umutgungorr.com/). Read the [TokenGuard case study](https://umutgungorr.com/projects/tokenguard) for its design decisions, outputs, and scope.
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
