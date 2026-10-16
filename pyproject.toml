@@ -7,12 +7,20 @@ name = "tokenguard-cli"
 version = "0.2.0"
 description = "Fast, zero-dependency Git pre-commit secret and API key scanner CLI."
 readme = "README.md"
+license = "MIT"
+authors = [{ name = "Umut Güngör" }]
 requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
 tokenguard = "tokenguard.main:main"
 tokenguard-cli = "tokenguard.main:main"
+
+[project.urls]
+Homepage = "https://umutgungorr.com/projects/tokenguard"
+Documentation = "https://umutgungorr.com/projects/tokenguard"
+Repository = "https://github.com/umutgungorr/tokenguard"
+Issues = "https://github.com/umutgungorr/tokenguard/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tokenguard"]
