@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import math
 import re
-from dataclasses import dataclass
 from enum import Enum
+
+from .compat import slotted_dataclass
 
 
 class Severity(Enum):
@@ -20,7 +21,7 @@ class Confidence(Enum):
     LOW = "LOW"
 
 
-@dataclass(frozen=True, slots=True)
+@slotted_dataclass(frozen=True)
 class SecretRule:
     rule_id: str
     name: str

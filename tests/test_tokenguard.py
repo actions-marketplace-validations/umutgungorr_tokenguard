@@ -3,11 +3,11 @@
 import json
 from pathlib import Path
 
-from tokenguard.baseline import compute_fingerprint, filter_baseline, load_baseline, save_baseline
+from tokenguard.baseline import filter_baseline, load_baseline, save_baseline
 from tokenguard.main import main
 from tokenguard.rules import mask_secret
-from tokenguard.sarif import generate_sarif, to_sarif_json
-from tokenguard.scanner import Finding, Scanner
+from tokenguard.sarif import generate_sarif
+from tokenguard.scanner import Scanner
 
 
 def test_clean_content_passes() -> None:
@@ -163,3 +163,68 @@ def test_cli_update_baseline_workflow(tmp_path: Path) -> None:
     # Step 2: Next scan with baseline yields 0 (suppressed)
     exit_code_2 = main(["--baseline", str(baseline_file), str(dirty_file)])
     assert exit_code_2 == 0
+
+
+def test_detects_aws_secret_access_key() -> None:
+    scanner = Scanner()
+    dummy_secret = "wJalrXUtnFEMI/" + "K7MDENG/bPxRfiCYEXAMPLEKEY"
+    findings = scanner.scan_text(f'aws_secret_access_key = "{dummy_secret}"')
+    assert len(findings) == 1
+    assert findings[0].rule_id == "SEC-002"
+
+
+def test_detects_openai_api_key() -> None:
+    scanner = Scanner()
+    dummy_openai = "sk-" + "abcdefghijklmnopqrstuvwxyz1234567890ABCD"
+    findings = scanner.scan_text(f'OPENAI_KEY = "{dummy_openai}"')
+    assert len(findings) == 1
+    assert findings[0].rule_id == "SEC-004"
+
+
+def test_detects_generic_api_key() -> None:
+    scanner = Scanner()
+    dummy_generic = "my_super_secret_" + "api_token_value_12345"
+    findings = scanner.scan_text(f'api_key = "{dummy_generic}"')
+    assert len(findings) == 1
+    assert findings[0].rule_id == "SEC-007"
+
+
+def test_detects_jwt_token() -> None:
+    scanner = Scanner()
+    dummy_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4ifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    findings = scanner.scan_text(f'token = "{dummy_jwt}"')
+    assert len(findings) == 1
+    assert findings[0].rule_id == "SEC-008"
+
+
+def test_ignore_rule_flag(tmp_path: Path) -> None:
+    dirty_file = tmp_path / "config.py"
+    dummy_secret = "AK" + "IAIOSFODNN7EXAMPLE"
+    dirty_file.write_text(f"secret = '{dummy_secret}'", encoding="utf-8")
+    assert main(["--ignore-rule", "SEC-001", "--entropy-threshold", "0", str(dirty_file)]) == 0
+
+
+def test_dry_run_returns_zero_on_findings(tmp_path: Path) -> None:
+    dirty_file = tmp_path / "config.py"
+    dummy_secret = "AK" + "IAIOSFODNN7EXAMPLE"
+    dirty_file.write_text(f"secret = '{dummy_secret}'", encoding="utf-8")
+    assert main(["--dry-run", str(dirty_file)]) == 0
+
+
+def test_version_flag_exits_zero() -> None:
+    assert main(["--version"]) == 0
+
+
+def test_install_hook_outside_git_repo(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    assert main(["--install-hook"]) == 2
+
+
+def test_install_hook_inside_git_repo(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / ".git").mkdir()
+    monkeypatch.chdir(tmp_path)
+    assert main(["--install-hook"]) == 0
+    hook = tmp_path / ".git" / "hooks" / "pre-commit"
+    assert hook.is_file()
+    assert "tokenguard --staged" in hook.read_text(encoding="utf-8")
+

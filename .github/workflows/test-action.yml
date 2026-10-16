@@ -1,0 +1,38 @@
+name: Test GitHub Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-action:
+    name: Test TokenGuard Action (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run TokenGuard Action on clean fixture directory
+        uses: ./
+        with:
+          format: 'text'
+          args: 'tests/fixtures/clean_project'
+
+      - name: Run TokenGuard Action with SARIF output
+        uses: ./
+        with:
+          format: 'sarif'
+          output: 'results.sarif'
+          args: 'tests/fixtures/clean_project'

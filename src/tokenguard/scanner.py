@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 import re
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 
 from .baseline import compute_fingerprint
+from .compat import slotted_dataclass
 from .rules import (
     RULES,
     Confidence,
@@ -56,7 +56,7 @@ IGNORED_EXTENSIONS = {
 }
 
 
-@dataclass(frozen=True, slots=True)
+@slotted_dataclass(frozen=True)
 class Finding:
     file_path: str
     line_number: int
