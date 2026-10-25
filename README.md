@@ -17,7 +17,7 @@
 [![CI](https://github.com/umutgungorr/tokenguard/actions/workflows/ci.yml/badge.svg)](https://github.com/umutgungorr/tokenguard/actions/workflows/ci.yml)
 [![Action CI](https://github.com/umutgungorr/tokenguard/actions/workflows/test-action.yml/badge.svg)](https://github.com/umutgungorr/tokenguard/actions/workflows/test-action.yml)
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-TokenGuard%20Action-green?logo=githubactions&logoColor=white)](https://github.com/marketplace/actions/tokenguard-secret-scanner)
-[![Version](https://img.shields.io/badge/version-v0.2.0-blue.svg?logo=git&logoColor=white)](https://github.com/umutgungorr/tokenguard/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.1-blue.svg?logo=git&logoColor=white)](https://github.com/umutgungorr/tokenguard/releases)
 [![PyPI](https://img.shields.io/pypi/v/tokenguard-cli.svg?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/tokenguard-cli/)
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-3776AB.svg?logo=python&logoColor=white)](https://github.com/umutgungorr/tokenguard)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0%20external-success.svg)](pyproject.toml)
@@ -237,7 +237,7 @@ Use with the standard `pre-commit` framework:
 ```yaml
 repos:
   - repo: https://github.com/umutgungorr/tokenguard
-    rev: v0.2.0
+    rev: v0.2.1
     hooks:
       - id: tokenguard
 ```
