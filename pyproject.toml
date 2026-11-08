@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tokenguard-cli"
-version = "0.2.0"
+version = "0.2.1"
 description = "Fast, zero-dependency Git pre-commit secret and API key scanner CLI with Shannon entropy detection, fingerprinted baselines, and native SARIF v2.1.0."
 readme = "README.md"
 authors = [
@@ -58,7 +58,7 @@ tokenguard = "tokenguard.main:main"
 tokenguard-cli = "tokenguard.main:main"
 
 [project.urls]
-Homepage = "https://umutgungorr.com/projects/tokenguard"
+Homepage = "https://umutgungorr.com/"
 Documentation = "https://umutgungorr.com/projects/tokenguard"
 Repository = "https://github.com/umutgungorr/tokenguard"
 Issues = "https://github.com/umutgungorr/tokenguard/issues"
